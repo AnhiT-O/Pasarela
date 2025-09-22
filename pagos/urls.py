@@ -19,8 +19,4 @@ urlpatterns = [
     path('crear/', views.crear_pago, name='crear_pago'),
     path('estado/<str:id_transaccion>/', views.obtener_estado, name='obtener_estado'),
     path('estado-pago/<str:id_transaccion>/', views.estado_pago, name='estado_pago'),
-
-    # Nuevas URLs para la API
-    path('api/transaccion/<str:codigo_operacion>/', views.consultar_transaccion, name='consultar_transaccion'),
-    path('api/transaccion/<str:codigo_operacion>/actualizar/', views.actualizar_estado, name='actualizar_estado'),
 ]

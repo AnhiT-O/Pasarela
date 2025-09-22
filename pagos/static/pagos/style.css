@@ -327,41 +327,56 @@ form button[type="submit"]:hover {
     background-color: #1f576e;
 }
 
-/* Estilos adicionales para estado_pago.html */
-.transaction-details {
+/* Estilos adicionales para el formulario de pago */
+.payment-card.selected {
+    border-color: var(--color-azul-oscuro);
     background-color: var(--color-azul-claro);
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
+    transform: scale(1.05);
 }
 
-.transaction-details p {
-    margin: 15px 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.id-badge {
-    font-family: monospace;
-    background: var(--color-gris-claro);
-    padding: 5px 10px;
-    border-radius: 4px;
-}
-
-.metodo-pago {
+.btn-primary {
+    width: 100%;
+    padding: 14px;
+    background-color: var(--color-azul-oscuro);
+    color: var(--color-texto-claro);
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
     font-weight: 600;
-    color: var(--color-azul-oscuro);
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.3s ease;
 }
 
-.referencia, .codigo-operacion {
-    font-family: monospace;
+.btn-primary:hover {
+    background-color: #1f576e;
+    transform: translateY(-2px);
+}
+
+/* Estilos para mensajes de alerta */
+.alert {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px 40px;
+    background-color: var(--color-blanco);
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    font-size: 1.2rem;
     font-weight: 500;
-    color: var(--color-azul-oscuro);
+    text-align: center;
+    z-index: 1000;
+    min-width: 300px;
+    max-width: 80%;
 }
 
-/* Ajuste para el badge de estado */
-.estado-badge {
-    min-width: 100px;
-    text-align: center;
+.alert.success {
+    border-left: 8px solid var(--color-exito);
+    color: var(--color-exito);
+}
+
+.alert.error {
+    border-left: 8px solid var(--color-error);
+    color: var(--color-error);
 }
