@@ -1,0 +1,121 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago con Billetera</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'pagos/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Pago con Billetera Móvil</h1>
+        <form id="billeteraForm">
+            <div class="form-group">
+                <label for="monto">Monto:</label>
+                <input type="number" id="monto" name="monto" required min="1" step="0.01">
+            </div>
+
+            <div class="form-group">
+                <label for="tipo_billetera">Tipo de Billetera:</label>
+                <select id="tipo_billetera" name="tipo_billetera" required>
+                    <option value="">Seleccione una billetera</option>
+                    <option value="TIGO">Tigo Money</option>
+                    <option value="PERSONAL">Billetera Personal</option>
+                    <option value="ZIMPLE">Zimple</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">Número de Teléfono:</label>
+                <input type="tel" id="telefono" name="telefono" required 
+                       pattern="[0-9]{10}" placeholder="09XXXXXXXX">
+            </div>
+
+            <div class="form-group">
+                <label for="ci_number">Número de C.I.:</label>
+                <input type="text" id="ci_number" name="ci_number" required>
+            </div>
+
+            <button type="submit" class="btn-primary">Confirmar Pago</button>
+            <button type="button" class="button-secondary" onclick="window.location.href='/pagos/'">Volver</button>
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBNPJGr87kGClz2QewAjxELBUqmzIDQkM0",
+            authDomain: "pasarela-69d39.firebaseapp.com",
+            projectId: "pasarela-69d39",
+            storageBucket: "pasarela-69d39.appspot.com",
+            messagingSenderId: "628236052969",
+            appId: "1:628236052969:web:bea3ae96930dce8da7878d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const mobileWalletsCollection = collection(db, 'mobile-wallets');
+
+        // Agregar billetera de prueba
+        async function addTestWallet() {
+            const testWallet = {
+                tipo_billetera: "TIGO",
+                telefono: "0981123456",
+                ci: "1234567"
+            };
+            try {
+                await setDoc(doc(mobileWalletsCollection, `${testWallet.tipo_billetera}-${testWallet.telefono}`), testWallet);
+                console.log("Billetera de prueba agregada");
+            } catch (error) {
+                console.error("Error al agregar billetera de prueba:", error);
+            }
+        }
+
+        window.addEventListener('load', addTestWallet);
+
+        function showProcessingMessage() {
+            return alert('Procesando pago...');
+        }
+
+        document.getElementById('billeteraForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const processingMsg = showProcessingMessage();
+
+            const formData = {
+                monto: document.getElementById('monto').value.trim(),
+                tipo_billetera: document.getElementById('tipo_billetera').value,
+                telefono: document.getElementById('telefono').value.trim(),
+                ci: document.getElementById('ci_number').value.trim()
+            };
+
+            try {
+                const q = query(mobileWalletsCollection, 
+                    where("tipo_billetera", "==", formData.tipo_billetera),
+                    where("telefono", "==", formData.telefono),
+                    where("ci", "==", formData.ci));
+                
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    processingMsg.close();
+                    alert('Error: No existe una billetera con esos datos');
+                    return;
+                }
+
+                processingMsg.close();
+                alert(`Pago exitoso: Gs. ${formData.monto} transferido a ${formData.tipo_billetera}`);
+                document.getElementById('billeteraForm').reset();
+                window.location.href = '/pagos/';
+            } catch (error) {
+                processingMsg.close();
+                console.error('Error:', error);
+                alert('Error en la transacción. Por favor, intente nuevamente.');
+            }
+        });
+    </script>
+</body>
+</html>

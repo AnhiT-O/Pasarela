@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seleccionar Método de Pago</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'pagos/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Seleccione Método de Pago</h1>
+        
+        <div class="payment-options">
+            <div class="payment-card" onclick="window.location.href='/pagos/transferencia/'">
+                <img src="{% static 'pagos/img/bank.png' %}" alt="Transferencia">
+                <h3>Transferencia Bancaria</h3>
+                <p>Realice el pago mediante transferencia bancaria</p>
+            </div>
+            
+            <div class="payment-card" onclick="window.location.href='/pagos/billetera/'">
+                <img src="{% static 'pagos/img/wallet.png' %}" alt="Billetera">
+                <h3>Billetera Móvil</h3>
+                <p>Pague usando su billetera móvil favorita</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
