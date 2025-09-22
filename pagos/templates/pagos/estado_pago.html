@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estado del Pago</title>
+    <link rel="stylesheet" href="{% static 'pagos/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Estado de la Transacción</h1>
+        
+        <div class="info-transaccion status-info">
+            <h2>Detalles del Pago</h2>
+            
+            <div class="transaction-details">
+                <p><strong>ID de Transacción:</strong> 
+                    <span class="id-badge">{{ transaccion.id_externo }}</span>
+                </p>
+                
+                <p><strong>Estado:</strong> 
+                    <span id="estado" class="estado-badge estado-{{ transaccion.estado|lower }}" 
+                          data-last-status="{{ transaccion.estado }}">
+                        {{ transaccion.estado }}
+                    </span>
+                </p>
+                
+                <p><strong>Monto:</strong> 
+                    <span class="monto">
+                        Gs. {{ transaccion.monto|floatformat:2|intcomma }}
+                    </span>
+                </p>
+                
+                <p><strong>Método de Pago:</strong> 
+                    <span class="metodo-pago">{{ transaccion.metodo_pago }}</span>
+                </p>
+                
+                {% if transaccion.referencia_pago %}
+                    <p><strong>Referencia:</strong> 
+                        <span class="referencia">{{ transaccion.referencia_pago }}</span>
+                    </p>
+                {% endif %}
+
+                {% if transaccion.codigo_operacion %}
+                    <p><strong>Código de Operación:</strong> 
+                        <span class="codigo-operacion">{{ transaccion.codigo_operacion }}</span>
+                    </p>
+                {% endif %}
+            </div>
+
+            <div class="back-link">
+                <a href="{% url 'pagos:seleccionar_metodo' %}">Realizar otro pago</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pop-up y Overlay -->
+    <div id="overlay" class="overlay"></div>
+    <div id="popup" class="popup">
+        <div id="popup-content" class="popup-content"></div>
+        <button class="popup-close" onclick="closePopup()">Cerrar</button>
+    </div>
+
+    <script>
+        function showPopup(message, type) {
+            const popup = document.getElementById('popup');
+            const overlay = document.getElementById('overlay');
+            const content = document.getElementById('popup-content');
+            
+            popup.className = 'popup ' + type;
+            content.textContent = message;
+            
+            popup.style.display = 'block';
+            overlay.style.display = 'block';
+        }
+
+        function closePopup() {
+            const popup = document.getElementById('popup');
+            const overlay = document.getElementById('overlay');
+            
+            popup.style.display = 'none';
+            overlay.style.display = 'none';
+        }
+
+        async function actualizarEstado() {
+            try {
+                const response = await fetch(`/pagos/estado/{{ transaccion.id_externo }}/`);
+                const data = await response.json();
+                if (response.ok) {
+                    const estadoElement = document.getElementById('estado');
+                    const estadoActual = estadoElement.textContent.trim();
+                    
+                    // Actualizar estado solo si cambió
+                    if (data.status !== estadoActual) {
+                        estadoElement.textContent = data.status;
+                        estadoElement.className = `estado-badge estado-${data.status.toLowerCase()}`;
+                        showPopup(`Estado actualizado a: ${data.status}`, 'info');
+                    }
+                    
+                    // Actualizar monto
+                    const monto = parseFloat(data.monto).toLocaleString('es-PY', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                    document.querySelector('.monto').textContent = `Gs. ${monto}`;
+                }
+            } catch (error) {
+                console.error('Error al actualizar estado:', error);
+                showPopup('Error al actualizar estado', 'error');
+            }
+        }
+
+        // Actualizar estado cada 5 segundos
+        setInterval(actualizarEstado, 5000);
+    </script>
+</body>
+</html>
