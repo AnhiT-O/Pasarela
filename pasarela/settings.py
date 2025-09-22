@@ -11,11 +11,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-from dotenv import load_dotenv
-import os
-
-# Cargar variables de entorno
-load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,7 +37,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'corsheaders',
     'pagos',
 ]
 
@@ -54,7 +48,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  # Debe estar lo más arriba posible
 ]
 
 ROOT_URLCONF = 'pasarela.urls'
@@ -134,45 +127,3 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-# Configuración de la Pasarela
-PASARELA_CONFIG = {
-    'URL': os.getenv('PASARELA_URL'),
-    'SECRET': os.getenv('PASARELA_SECRET'),
-    'WEBHOOK_SECRET': os.getenv('WEBHOOK_SECRET'),
-}
-
-# Asegúrate de que las claves estén configuradas
-if not all(PASARELA_CONFIG.values()):
-    raise Exception('Error: Todas las variables de entorno de la pasarela deben estar configuradas')
-
-# Configuración de CORS
-CORS_ALLOW_ALL_ORIGINS = True  # Solo para desarrollo
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    # Agrega aquí los dominios permitidos en producción
-]
-
-CORS_ALLOW_METHODS = [
-    'GET',
-    'POST',
-    'PUT',
-    'PATCH',
-    'DELETE',
-    'OPTIONS'
-]
-
-CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
-    'x-signature',  # Para nuestro header personalizado
-]
