@@ -60,9 +60,6 @@
     </div>
 
     <script>
-        // ----------------------------
-        // IndexedDB en lugar de Firebase
-        // ----------------------------
         const DB_NAME = "TransferenciasDB";
         const DB_VERSION = 1;
         let db;
@@ -107,47 +104,21 @@
             });
         }
 
-        // Inicializar y cargar 4 cuentas de prueba
+        // Inicializar y cargar 10 cuentas de prueba
         window.addEventListener("load", async () => {
             await initDB();
 
             const cuentasPrueba = [
-                {
-                    id: "BBVA-123456",
-                    banco: "BBVA",
-                    nro_cuenta: "123456",
-                    titular: "Global Exchange",
-                    tipo_doc: "RUC",
-                    nro_documento: "1234567",
-                    tipo_cuenta: "Empresa"
-                },
-                {
-                    id: "ITAU-987654",
-                    banco: "ITAU",
-                    nro_cuenta: "987654",
-                    titular: "Juan Pérez",
-                    tipo_doc: "CI",
-                    nro_documento: "4567890",
-                    tipo_cuenta: "Personal"
-                },
-                {
-                    id: "BNF-555888",
-                    banco: "BNF",
-                    nro_cuenta: "555888",
-                    titular: "María López",
-                    tipo_doc: "CI",
-                    nro_documento: "1122334",
-                    tipo_cuenta: "Personal"
-                },
-                {
-                    id: "VISION-777999",
-                    banco: "VISION",
-                    nro_cuenta: "777999",
-                    titular: "Empresa XYZ",
-                    tipo_doc: "RUC",
-                    nro_documento: "8899001",
-                    tipo_cuenta: "Empresa"
-                }
+                { id: "BBVA-123456", banco: "BBVA", nro_cuenta: "123456", titular: "Global Exchange", tipo_doc: "RUC", nro_documento: "1234567", tipo_cuenta: "Empresa" },
+                { id: "ITAU-987654", banco: "ITAU", nro_cuenta: "987654", titular: "Juan Pérez", tipo_doc: "CI", nro_documento: "4567890", tipo_cuenta: "Personal" },
+                { id: "BNF-555888", banco: "BNF", nro_cuenta: "555888", titular: "María López", tipo_doc: "CI", nro_documento: "1122334", tipo_cuenta: "Personal" },
+                { id: "VISION-777999", banco: "VISION", nro_cuenta: "777999", titular: "Empresa XYZ", tipo_doc: "RUC", nro_documento: "8899001", tipo_cuenta: "Empresa" },
+                { id: "GNB-111222", banco: "GNB", nro_cuenta: "111222", titular: "Carlos Fernández", tipo_doc: "CI", nro_documento: "2233445", tipo_cuenta: "Personal" },
+                { id: "ITAU-333444", banco: "ITAU", nro_cuenta: "333444", titular: "Ana Gómez", tipo_doc: "CI", nro_documento: "3344556", tipo_cuenta: "Personal" },
+                { id: "BBVA-555666", banco: "BBVA", nro_cuenta: "555666", titular: "Empresa ABC", tipo_doc: "RUC", nro_documento: "4455667", tipo_cuenta: "Empresa" },
+                { id: "BNF-777888", banco: "BNF", nro_cuenta: "777888", titular: "Pedro Martínez", tipo_doc: "CI", nro_documento: "5566778", tipo_cuenta: "Personal" },
+                { id: "VISION-999000", banco: "VISION", nro_cuenta: "999000", titular: "Empresa LMN", tipo_doc: "RUC", nro_documento: "6677889", tipo_cuenta: "Empresa" },
+                { id: "GNB-222333", banco: "GNB", nro_cuenta: "222333", titular: "Lucía Ramírez", tipo_doc: "CI", nro_documento: "7788990", tipo_cuenta: "Personal" }
             ];
 
             for (let c of cuentasPrueba) {
@@ -160,7 +131,6 @@
             alert("Procesando transferencia...");
         }
 
-        // Evento del formulario
         document.getElementById("transferenciaForm").addEventListener("submit", async (e) => {
             e.preventDefault();
             showProcessingMessage();
@@ -179,6 +149,7 @@
 
                 if (!account) {
                     alert("Error: No existe una cuenta bancaria con esos datos");
+                    document.getElementById("transferenciaForm").reset();
                     return;
                 }
 
@@ -188,6 +159,7 @@
                     formData.nro_documento !== account.nro_documento
                 ) {
                     alert("Error: Los datos ingresados no coinciden con la cuenta registrada");
+                    document.getElementById("transferenciaForm").reset();
                     return;
                 }
 
@@ -197,6 +169,7 @@
             } catch (error) {
                 console.error("Error:", error);
                 alert("Error en la transacción. Por favor, intente nuevamente.");
+                document.getElementById("transferenciaForm").reset();
             }
         });
     </script>

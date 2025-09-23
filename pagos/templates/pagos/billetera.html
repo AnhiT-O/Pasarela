@@ -43,9 +43,6 @@
     </div>
 
     <script>
-        // ----------------------------
-        // IndexedDB en lugar de Firebase
-        // ----------------------------
         const DB_NAME = "PagosDB";
         const DB_VERSION = 1;
         let db;
@@ -90,23 +87,34 @@
             });
         }
 
-        // Inicializar y cargar billetera de prueba
+        // Inicializar y cargar billeteras de prueba
         window.addEventListener("load", async () => {
             await initDB();
-            await addWallet({
-                id: "TIGO-0981123456-1234567",
-                tipo_billetera: "TIGO",
-                telefono: "0981123456",
-                ci: "1234567"
-            });
-            console.log("Billetera de prueba guardada en IndexedDB local");
+
+            const wallets = [
+                { id: "TIGO-0981000001-1010101", tipo_billetera: "TIGO", telefono: "0981000001", ci: "1010101" },
+                { id: "PERSONAL-0982000002-2020202", tipo_billetera: "PERSONAL", telefono: "0982000002", ci: "2020202" },
+                { id: "ZIMPLE-0983000003-3030303", tipo_billetera: "ZIMPLE", telefono: "0983000003", ci: "3030303" },
+                { id: "TIGO-0984000004-4040404", tipo_billetera: "TIGO", telefono: "0984000004", ci: "4040404" },
+                { id: "PERSONAL-0985000005-5050505", tipo_billetera: "PERSONAL", telefono: "0985000005", ci: "5050505" },
+                { id: "ZIMPLE-0986000006-6060606", tipo_billetera: "ZIMPLE", telefono: "0986000006", ci: "6060606" },
+                { id: "TIGO-0987000007-7070707", tipo_billetera: "TIGO", telefono: "0987000007", ci: "7070707" },
+                { id: "PERSONAL-0988000008-8080808", tipo_billetera: "PERSONAL", telefono: "0988000008", ci: "8080808" },
+                { id: "ZIMPLE-0989000009-9090909", tipo_billetera: "ZIMPLE", telefono: "0989000009", ci: "9090909" },
+                { id: "TIGO-0981010100-1111111", tipo_billetera: "TIGO", telefono: "0981010100", ci: "1111111" }
+            ];
+
+            for (const wallet of wallets) {
+                await addWallet(wallet);
+            }
+
+            console.log("Billeteras de prueba guardadas en IndexedDB local");
         });
 
         function showProcessingMessage() {
             alert("Procesando pago...");
         }
 
-        // Evento del formulario
         document.getElementById("billeteraForm").addEventListener("submit", async (e) => {
             e.preventDefault();
             showProcessingMessage();
@@ -123,6 +131,7 @@
 
                 if (!wallet) {
                     alert("Error: No existe una billetera con esos datos");
+                    document.getElementById("billeteraForm").reset(); // Limpiar formulario
                     return;
                 }
 
@@ -132,6 +141,7 @@
             } catch (error) {
                 console.error("Error:", error);
                 alert("Error en la transacción. Por favor, intente nuevamente.");
+                document.getElementById("billeteraForm").reset(); // Limpiar formulario
             }
         });
     </script>
