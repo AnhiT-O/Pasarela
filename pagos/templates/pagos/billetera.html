@@ -42,78 +42,96 @@
         </form>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, query, where, getDocs, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <script>
+        // ----------------------------
+        // IndexedDB en lugar de Firebase
+        // ----------------------------
+        const DB_NAME = "PagosDB";
+        const DB_VERSION = 1;
+        let db;
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBNPJGr87kGClz2QewAjxELBUqmzIDQkM0",
-            authDomain: "pasarela-69d39.firebaseapp.com",
-            projectId: "pasarela-69d39",
-            storageBucket: "pasarela-69d39.appspot.com",
-            messagingSenderId: "628236052969",
-            appId: "1:628236052969:web:bea3ae96930dce8da7878d"
-        };
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const mobileWalletsCollection = collection(db, 'mobile-wallets');
+                request.onupgradeneeded = (e) => {
+                    db = e.target.result;
+                    if (!db.objectStoreNames.contains("mobile_wallets")) {
+                        db.createObjectStore("mobile_wallets", { keyPath: "id" });
+                    }
+                };
 
-        // Agregar billetera de prueba
-        async function addTestWallet() {
-            const testWallet = {
+                request.onsuccess = (e) => {
+                    db = e.target.result;
+                    resolve();
+                };
+
+                request.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        function addWallet(wallet) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction("mobile_wallets", "readwrite");
+                const store = tx.objectStore("mobile_wallets");
+                store.put(wallet);
+                tx.oncomplete = () => resolve();
+                tx.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        function findWallet(tipo, telefono, ci) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction("mobile_wallets", "readonly");
+                const store = tx.objectStore("mobile_wallets");
+                const request = store.get(`${tipo}-${telefono}-${ci}`);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        // Inicializar y cargar billetera de prueba
+        window.addEventListener("load", async () => {
+            await initDB();
+            await addWallet({
+                id: "TIGO-0981123456-1234567",
                 tipo_billetera: "TIGO",
                 telefono: "0981123456",
                 ci: "1234567"
-            };
-            try {
-                await setDoc(doc(mobileWalletsCollection, `${testWallet.tipo_billetera}-${testWallet.telefono}`), testWallet);
-                console.log("Billetera de prueba agregada");
-            } catch (error) {
-                console.error("Error al agregar billetera de prueba:", error);
-            }
-        }
-
-        window.addEventListener('load', addTestWallet);
+            });
+            console.log("Billetera de prueba guardada en IndexedDB local");
+        });
 
         function showProcessingMessage() {
-            return alert('Procesando pago...');
+            alert("Procesando pago...");
         }
 
-        document.getElementById('billeteraForm').addEventListener('submit', async (e) => {
+        // Evento del formulario
+        document.getElementById("billeteraForm").addEventListener("submit", async (e) => {
             e.preventDefault();
-            const processingMsg = showProcessingMessage();
+            showProcessingMessage();
 
             const formData = {
-                monto: document.getElementById('monto').value.trim(),
-                tipo_billetera: document.getElementById('tipo_billetera').value,
-                telefono: document.getElementById('telefono').value.trim(),
-                ci: document.getElementById('ci_number').value.trim()
+                monto: document.getElementById("monto").value.trim(),
+                tipo_billetera: document.getElementById("tipo_billetera").value,
+                telefono: document.getElementById("telefono").value.trim(),
+                ci: document.getElementById("ci_number").value.trim()
             };
 
             try {
-                const q = query(mobileWalletsCollection, 
-                    where("tipo_billetera", "==", formData.tipo_billetera),
-                    where("telefono", "==", formData.telefono),
-                    where("ci", "==", formData.ci));
-                
-                const querySnapshot = await getDocs(q);
-                
-                if (querySnapshot.empty) {
-                    processingMsg.close();
-                    alert('Error: No existe una billetera con esos datos');
+                const wallet = await findWallet(formData.tipo_billetera, formData.telefono, formData.ci);
+
+                if (!wallet) {
+                    alert("Error: No existe una billetera con esos datos");
                     return;
                 }
 
-                processingMsg.close();
                 alert(`Pago exitoso: Gs. ${formData.monto} transferido a ${formData.tipo_billetera}`);
-                document.getElementById('billeteraForm').reset();
-                window.location.href = '/pagos/';
+                document.getElementById("billeteraForm").reset();
+                window.location.href = "/pagos/";
             } catch (error) {
-                processingMsg.close();
-                console.error('Error:', error);
-                alert('Error en la transacción. Por favor, intente nuevamente.');
+                console.error("Error:", error);
+                alert("Error en la transacción. Por favor, intente nuevamente.");
             }
         });
     </script>
