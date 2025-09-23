@@ -7,9 +7,9 @@
 
 ## Bancos Disponibles
 - Banco Itaú
-- BBVA
+- Sudameris Bank
 - Banco Nacional de Fomento (BNF)
-- Visión Banco
+- Wueno Bank
 - Banco GNB
 
 # Base de Datos de Prueba
@@ -33,13 +33,13 @@
 
 | Banco   | Nro. Cuenta | Titular           | Tipo Doc | Nro. Documento | Tipo Cuenta |
 |---------|-------------|-------------------|----------|----------------|-------------|
-| BBVA    | 123456      | Global Exchange   | RUC      | 1234567        | Empresa     |
+| SUDAMERIS | 123456      | Global Exchange   | RUC      | 1234567        | Empresa     |
 | ITAU    | 987654      | Juan Pérez       | CI       | 4567890        | Personal    |
 | BNF     | 555888      | María López      | CI       | 1122334        | Personal    |
-| VISION  | 777999      | Empresa XYZ      | RUC      | 8899001        | Empresa     |
+| WUENO   | 777999      | Empresa XYZ      | RUC      | 8899001        | Empresa     |
 | GNB     | 111222      | Carlos Fernández | CI       | 2233445        | Personal    |
 | ITAU    | 333444      | Ana Gómez        | CI       | 3344556        | Personal    |
-| BBVA    | 555666      | Empresa ABC      | RUC      | 4455667        | Empresa     |
+| SUDAMERIS | 555666      | Empresa ABC      | RUC      | 4455667        | Empresa     |
 | BNF     | 777888      | Pedro Martínez   | CI       | 5566778        | Personal    |
-| VISION  | 999000      | Empresa LMN      | RUC      | 6677889        | Empresa     |
+| WUENO   | 999000      | Empresa LMN      | RUC      | 6677889        | Empresa     |
 | GNB     | 222333      | Lucía Ramírez    | CI       | 7788990        | Personal    |
