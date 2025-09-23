@@ -154,6 +154,22 @@ La pasarela enviará las notificaciones a:
 ```
 http://localhost:8000/api/pago/  # Ajusta esta URL según tu configuración
 ```
+## 📌 Desglosemos la URL:
+
+http://localhost:8000
+→ es la dirección de tu servidor Django.
+
+localhost significa que corre en tu computadora local.
+
+8000 es el puerto que usa Django por defecto (python manage.py runserver).
+
+/api/pago/
+→ es la ruta del endpoint que defines en tu urls.py para manejar los pagos.
+
+Puede llamarse /api/pago/, /pagos/recibir/, /transacciones/, o como quieras.
+
+Lo importante es que coincida con la vista en Django que escribiste (recibir_pago).
+
 
 ## Seguridad
 
