@@ -3,175 +3,189 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta n    try {
+        await fetch('http://localhost:8000/recibir_pago/', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ estado, monto, banco, usuario })viewport" content="width=device-width, initial-scale=1.0">
     <title>Transferencia Bancaria</title>
     <link rel="stylesheet" type="text/css" href="{% static 'pagos/style.css' %}">
 </head>
 <body>
-    <div class="container">
-        <h1>Transferencia Bancaria</h1>
-        
-        <form id="transferenciaForm">
-            <div class="form-group">
-                <label for="monto">Monto:</label>
-                <input type="number" id="monto" name="monto" required min="1" step="0.01">
-            </div>
+<div class="container">
+    <h1>Transferencia Bancaria</h1>
+    <form id="transferenciaForm">
+        <div class="form-group">
+            <label for="monto">Monto:</label>
+            <input type="number" id="monto" name="monto" required min="1" step="0.01">
+        </div>
 
-            <div class="form-group">
-                <label for="banco">Banco:</label>
-                <select id="banco" name="banco" required>
-                    <option value="">Seleccione un banco</option>
-                    <option value="ITAU">Banco Itaú</option>
-                    <option value="BBVA">BBVA</option>
-                    <option value="BNF">Banco Nacional de Fomento</option>
-                    <option value="VISION">Visión Banco</option>
-                    <option value="GNB">Banco GNB</option>
+        <div class="form-group">
+            <label for="banco">Banco:</label>
+            <select id="banco" name="banco" required>
+                <option value="">Seleccione un banco</option>
+                <option value="ITAU">Banco Itaú</option>
+                <option value="BBVA">BBVA</option>
+                <option value="BNF">Banco Nacional de Fomento</option>
+                <option value="VISION">Visión Banco</option>
+                <option value="GNB">Banco GNB</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="titular">Nombre del Titular:</label>
+            <input type="text" id="titular" name="titular" required>
+        </div>
+
+        <div class="documento-group">
+            <div>
+                <label for="tipo_doc">Tipo de Documento:</label>
+                <select id="tipo_doc" name="tipo_doc" required>
+                    <option value="CI">Cédula de Identidad</option>
+                    <option value="RUC">RUC</option>
                 </select>
             </div>
-
-            <div class="form-group">
-                <label for="titular">Nombre del Titular:</label>
-                <input type="text" id="titular" name="titular" required>
+            
+            <div>
+                <label for="nro_documento">Número de Documento:</label>
+                <input type="text" id="nro_documento" name="nro_documento" required>
             </div>
+        </div>
 
-            <div class="documento-group">
-                <div>
-                    <label for="tipo_doc">Tipo de Documento:</label>
-                    <select id="tipo_doc" name="tipo_doc" required>
-                        <option value="CI">Cédula de Identidad</option>
-                        <option value="RUC">RUC</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="nro_documento">Número de Documento:</label>
-                    <input type="text" id="nro_documento" name="nro_documento" required>
-                </div>
-            </div>
+        <div class="form-group">
+            <label for="nro_cuenta">Número de Cuenta:</label>
+            <input type="text" id="nro_cuenta" name="nro_cuenta" required>
+        </div>
 
-            <div class="form-group">
-                <label for="nro_cuenta">Número de Cuenta:</label>
-                <input type="text" id="nro_cuenta" name="nro_cuenta" required>
-            </div>
+        <button type="submit" class="btn-primary">Confirmar Transferencia</button>
+        <button type="button" class="button-secondary" onclick="window.location.href='http://localhost:8000/'">Volver al Sitio Principal</button>
+    </form>
+</div>
 
-            <button type="submit" class="btn-primary">Confirmar Transferencia</button>
-            <button type="button" class="button-secondary" onclick="window.location.href='/pagos/'">Volver</button>
-        </form>
-    </div>
+<script>
+const DB_NAME = "TransferenciasDB";
+const DB_VERSION = 1;
+let db;
 
-    <script>
-        const DB_NAME = "TransferenciasDB";
-        const DB_VERSION = 1;
-        let db;
-
-        function initDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-                request.onupgradeneeded = (e) => {
-                    db = e.target.result;
-                    if (!db.objectStoreNames.contains("bank_accounts")) {
-                        db.createObjectStore("bank_accounts", { keyPath: "id" });
-                    }
-                };
-
-                request.onsuccess = (e) => {
-                    db = e.target.result;
-                    resolve();
-                };
-
-                request.onerror = (e) => reject(e.target.error);
-            });
-        }
-
-        function addAccount(account) {
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction("bank_accounts", "readwrite");
-                const store = tx.objectStore("bank_accounts");
-                store.put(account);
-                tx.oncomplete = () => resolve();
-                tx.onerror = (e) => reject(e.target.error);
-            });
-        }
-
-        function findAccount(banco, nro_cuenta) {
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction("bank_accounts", "readonly");
-                const store = tx.objectStore("bank_accounts");
-                const request = store.get(`${banco}-${nro_cuenta}`);
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = (e) => reject(e.target.error);
-            });
-        }
-
-        // Inicializar y cargar 10 cuentas de prueba
-        window.addEventListener("load", async () => {
-            await initDB();
-
-            const cuentasPrueba = [
-                { id: "BBVA-123456", banco: "BBVA", nro_cuenta: "123456", titular: "Global Exchange", tipo_doc: "RUC", nro_documento: "1234567", tipo_cuenta: "Empresa" },
-                { id: "ITAU-987654", banco: "ITAU", nro_cuenta: "987654", titular: "Juan Pérez", tipo_doc: "CI", nro_documento: "4567890", tipo_cuenta: "Personal" },
-                { id: "BNF-555888", banco: "BNF", nro_cuenta: "555888", titular: "María López", tipo_doc: "CI", nro_documento: "1122334", tipo_cuenta: "Personal" },
-                { id: "VISION-777999", banco: "VISION", nro_cuenta: "777999", titular: "Empresa XYZ", tipo_doc: "RUC", nro_documento: "8899001", tipo_cuenta: "Empresa" },
-                { id: "GNB-111222", banco: "GNB", nro_cuenta: "111222", titular: "Carlos Fernández", tipo_doc: "CI", nro_documento: "2233445", tipo_cuenta: "Personal" },
-                { id: "ITAU-333444", banco: "ITAU", nro_cuenta: "333444", titular: "Ana Gómez", tipo_doc: "CI", nro_documento: "3344556", tipo_cuenta: "Personal" },
-                { id: "BBVA-555666", banco: "BBVA", nro_cuenta: "555666", titular: "Empresa ABC", tipo_doc: "RUC", nro_documento: "4455667", tipo_cuenta: "Empresa" },
-                { id: "BNF-777888", banco: "BNF", nro_cuenta: "777888", titular: "Pedro Martínez", tipo_doc: "CI", nro_documento: "5566778", tipo_cuenta: "Personal" },
-                { id: "VISION-999000", banco: "VISION", nro_cuenta: "999000", titular: "Empresa LMN", tipo_doc: "RUC", nro_documento: "6677889", tipo_cuenta: "Empresa" },
-                { id: "GNB-222333", banco: "GNB", nro_cuenta: "222333", titular: "Lucía Ramírez", tipo_doc: "CI", nro_documento: "7788990", tipo_cuenta: "Personal" }
-            ];
-
-            for (let c of cuentasPrueba) {
-                await addAccount(c);
+function initDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = e => {
+            db = e.target.result;
+            if (!db.objectStoreNames.contains("bank_accounts")) {
+                db.createObjectStore("bank_accounts", { keyPath: "id" });
             }
-            console.log("Cuentas de prueba guardadas en IndexedDB local");
-        });
+        };
+        request.onsuccess = e => { db = e.target.result; resolve(); };
+        request.onerror = e => reject(e.target.error);
+    });
+}
 
-        function showProcessingMessage() {
-            alert("Procesando transferencia...");
+function addAccount(account) {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("bank_accounts", "readwrite");
+        const store = tx.objectStore("bank_accounts");
+        store.put(account);
+        tx.oncomplete = () => resolve();
+        tx.onerror = e => reject(e.target.error);
+    });
+}
+
+function findAccount(banco, nro_cuenta) {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("bank_accounts", "readonly");
+        const store = tx.objectStore("bank_accounts");
+        const request = store.get(`${banco}-${nro_cuenta}`);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = e => reject(e.target.error);
+    });
+}
+
+// Notificar al proyecto de compra/venta
+async function notificarProyectoCompra(estado, monto=null, banco=null, usuario=null) {
+    try {
+        await fetch('http://localhost:8000/recibir_pago/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ estado, monto, banco, usuario })
+        });
+    } catch (error) {
+        console.error('Error notificando al proyecto compra:', error);
+    }
+}
+
+// Cargar cuentas de prueba
+window.addEventListener("load", async () => {
+    await initDB();
+
+    const cuentasPrueba = [
+        { id: "BBVA-123456", banco: "BBVA", nro_cuenta: "123456", titular: "Global Exchange", tipo_doc: "RUC", nro_documento: "1234567", tipo_cuenta: "Empresa" },
+        { id: "ITAU-987654", banco: "ITAU", nro_cuenta: "987654", titular: "Juan Pérez", tipo_doc: "CI", nro_documento: "4567890", tipo_cuenta: "Personal" },
+        { id: "BNF-555888", banco: "BNF", nro_cuenta: "555888", titular: "María López", tipo_doc: "CI", nro_documento: "1122334", tipo_cuenta: "Personal" },
+        { id: "VISION-777999", banco: "VISION", nro_cuenta: "777999", titular: "Empresa XYZ", tipo_doc: "RUC", nro_documento: "8899001", tipo_cuenta: "Empresa" },
+        { id: "GNB-111222", banco: "GNB", nro_cuenta: "111222", titular: "Carlos Fernández", tipo_doc: "CI", nro_documento: "2233445", tipo_cuenta: "Personal" },
+        { id: "ITAU-333444", banco: "ITAU", nro_cuenta: "333444", titular: "Ana Gómez", tipo_doc: "CI", nro_documento: "3344556", tipo_cuenta: "Personal" },
+        { id: "BBVA-555666", banco: "BBVA", nro_cuenta: "555666", titular: "Empresa ABC", tipo_doc: "RUC", nro_documento: "4455667", tipo_cuenta: "Empresa" },
+        { id: "BNF-777888", banco: "BNF", nro_cuenta: "777888", titular: "Pedro Martínez", tipo_doc: "CI", nro_documento: "5566778", tipo_cuenta: "Personal" },
+        { id: "VISION-999000", banco: "VISION", nro_cuenta: "999000", titular: "Empresa LMN", tipo_doc: "RUC", nro_documento: "6677889", tipo_cuenta: "Empresa" },
+        { id: "GNB-222333", banco: "GNB", nro_cuenta: "222333", titular: "Lucía Ramírez", tipo_doc: "CI", nro_documento: "7788990", tipo_cuenta: "Personal" }
+    ];
+
+    for (let c of cuentasPrueba) await addAccount(c);
+});
+
+// Procesar formulario
+document.getElementById("transferenciaForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    alert("Procesando transferencia...");
+
+    const formData = {
+        monto: document.getElementById("monto").value.trim(),
+        banco: document.getElementById("banco").value,
+        titular: document.getElementById("titular").value.trim(),
+        tipo_doc: document.getElementById("tipo_doc").value,
+        nro_documento: document.getElementById("nro_documento").value.trim(),
+        nro_cuenta: document.getElementById("nro_cuenta").value.trim()
+    };
+
+    try {
+        const account = await findAccount(formData.banco, formData.nro_cuenta);
+
+        if (!account) {
+            alert("Error: No existe una cuenta bancaria con esos datos");
+            document.getElementById("transferenciaForm").reset();
+            await notificarProyectoCompra('error', formData.monto, formData.banco, formData.nro_cuenta);
+            return;
         }
 
-        document.getElementById("transferenciaForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            showProcessingMessage();
+        if (formData.titular !== account.titular || formData.tipo_doc !== account.tipo_doc || formData.nro_documento !== account.nro_documento) {
+            alert("Error: Los datos ingresados no coinciden con la cuenta registrada");
+            document.getElementById("transferenciaForm").reset();
+            await notificarProyectoCompra('error', formData.monto, formData.banco, formData.nro_cuenta);
+            return;
+        }
 
-            const formData = {
-                monto: document.getElementById("monto").value.trim(),
-                banco: document.getElementById("banco").value,
-                titular: document.getElementById("titular").value.trim(),
-                tipo_doc: document.getElementById("tipo_doc").value,
-                nro_documento: document.getElementById("nro_documento").value.trim(),
-                nro_cuenta: document.getElementById("nro_cuenta").value.trim()
-            };
+        alert(`Transferencia exitosa: Gs. ${formData.monto} transferido a la cuenta ${formData.nro_cuenta}`);
+        document.getElementById("transferenciaForm").reset();
+        await notificarProyectoCompra('exito', formData.monto, formData.banco, formData.nro_cuenta);
 
-            try {
-                const account = await findAccount(formData.banco, formData.nro_cuenta);
+        window.location.href = "/pagos/";
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Error en la transacción. Por favor, intente nuevamente.");
+        document.getElementById("transferenciaForm").reset();
+        await notificarProyectoCompra('error', formData.monto, formData.banco, formData.nro_cuenta);
+    }
+});
 
-                if (!account) {
-                    alert("Error: No existe una cuenta bancaria con esos datos");
-                    document.getElementById("transferenciaForm").reset();
-                    return;
-                }
-
-                if (
-                    formData.titular !== account.titular ||
-                    formData.tipo_doc !== account.tipo_doc ||
-                    formData.nro_documento !== account.nro_documento
-                ) {
-                    alert("Error: Los datos ingresados no coinciden con la cuenta registrada");
-                    document.getElementById("transferenciaForm").reset();
-                    return;
-                }
-
-                alert(`Transferencia exitosa: Gs. ${formData.monto} transferido a la cuenta ${formData.nro_cuenta}`);
-                document.getElementById("transferenciaForm").reset();
-                window.location.href = "/pagos/";
-            } catch (error) {
-                console.error("Error:", error);
-                alert("Error en la transacción. Por favor, intente nuevamente.");
-                document.getElementById("transferenciaForm").reset();
-            }
-        });
-    </script>
+// Detectar abandono de la página
+window.addEventListener("beforeunload", async e => {
+    await notificarProyectoCompra('cancelado');
+});
+</script>
 </body>
 </html>

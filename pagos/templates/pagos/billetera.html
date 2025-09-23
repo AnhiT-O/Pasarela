@@ -2,148 +2,164 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"    try {
+        await fetch('http://localhost:8000/recibir_pago/', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ estado, monto, tipo_pago, usuario })  <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pago con Billetera</title>
     <link rel="stylesheet" type="text/css" href="{% static 'pagos/style.css' %}">
 </head>
 <body>
-    <div class="container">
-        <h1>Pago con Billetera Móvil</h1>
-        <form id="billeteraForm">
-            <div class="form-group">
-                <label for="monto">Monto:</label>
-                <input type="number" id="monto" name="monto" required min="1" step="0.01">
-            </div>
+<div class="container">
+    <h1>Pago con Billetera Móvil</h1>
+    <form id="billeteraForm">
+        <div class="form-group">
+            <label for="monto">Monto:</label>
+            <input type="number" id="monto" name="monto" required min="1" step="0.01">
+        </div>
 
-            <div class="form-group">
-                <label for="tipo_billetera">Tipo de Billetera:</label>
-                <select id="tipo_billetera" name="tipo_billetera" required>
-                    <option value="">Seleccione una billetera</option>
-                    <option value="TIGO">Tigo Money</option>
-                    <option value="PERSONAL">Billetera Personal</option>
-                    <option value="ZIMPLE">Zimple</option>
-                </select>
-            </div>
+        <div class="form-group">
+            <label for="tipo_billetera">Tipo de Billetera:</label>
+            <select id="tipo_billetera" name="tipo_billetera" required>
+                <option value="">Seleccione una billetera</option>
+                <option value="TIGO">Tigo Money</option>
+                <option value="PERSONAL">Billetera Personal</option>
+                <option value="ZIMPLE">Zimple</option>
+            </select>
+        </div>
 
-            <div class="form-group">
-                <label for="telefono">Número de Teléfono:</label>
-                <input type="tel" id="telefono" name="telefono" required 
-                       pattern="[0-9]{10}" placeholder="09XXXXXXXX">
-            </div>
+        <div class="form-group">
+            <label for="telefono">Número de Teléfono:</label>
+            <input type="tel" id="telefono" name="telefono" required pattern="[0-9]{10}" placeholder="09XXXXXXXX">
+        </div>
 
-            <div class="form-group">
-                <label for="ci_number">Número de C.I.:</label>
-                <input type="text" id="ci_number" name="ci_number" required>
-            </div>
+        <div class="form-group">
+            <label for="ci_number">Número de C.I.:</label>
+            <input type="text" id="ci_number" name="ci_number" required>
+        </div>
 
-            <button type="submit" class="btn-primary">Confirmar Pago</button>
-            <button type="button" class="button-secondary" onclick="window.location.href='/pagos/'">Volver</button>
-        </form>
-    </div>
+        <button type="submit" class="btn-primary">Confirmar Pago</button>
+        <button type="button" class="button-secondary" onclick="window.location.href='http://localhost:8000/'">Volver al Sitio Principal</button>
+    </form>
+</div>
 
-    <script>
-        const DB_NAME = "PagosDB";
-        const DB_VERSION = 1;
-        let db;
+<script>
+const DB_NAME = "PagosDB";
+const DB_VERSION = 1;
+let db;
 
-        function initDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-                request.onupgradeneeded = (e) => {
-                    db = e.target.result;
-                    if (!db.objectStoreNames.contains("mobile_wallets")) {
-                        db.createObjectStore("mobile_wallets", { keyPath: "id" });
-                    }
-                };
-
-                request.onsuccess = (e) => {
-                    db = e.target.result;
-                    resolve();
-                };
-
-                request.onerror = (e) => reject(e.target.error);
-            });
-        }
-
-        function addWallet(wallet) {
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction("mobile_wallets", "readwrite");
-                const store = tx.objectStore("mobile_wallets");
-                store.put(wallet);
-                tx.oncomplete = () => resolve();
-                tx.onerror = (e) => reject(e.target.error);
-            });
-        }
-
-        function findWallet(tipo, telefono, ci) {
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction("mobile_wallets", "readonly");
-                const store = tx.objectStore("mobile_wallets");
-                const request = store.get(`${tipo}-${telefono}-${ci}`);
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = (e) => reject(e.target.error);
-            });
-        }
-
-        // Inicializar y cargar billeteras de prueba
-        window.addEventListener("load", async () => {
-            await initDB();
-
-            const wallets = [
-                { id: "TIGO-0981000001-1010101", tipo_billetera: "TIGO", telefono: "0981000001", ci: "1010101" },
-                { id: "PERSONAL-0982000002-2020202", tipo_billetera: "PERSONAL", telefono: "0982000002", ci: "2020202" },
-                { id: "ZIMPLE-0983000003-3030303", tipo_billetera: "ZIMPLE", telefono: "0983000003", ci: "3030303" },
-                { id: "TIGO-0984000004-4040404", tipo_billetera: "TIGO", telefono: "0984000004", ci: "4040404" },
-                { id: "PERSONAL-0985000005-5050505", tipo_billetera: "PERSONAL", telefono: "0985000005", ci: "5050505" },
-                { id: "ZIMPLE-0986000006-6060606", tipo_billetera: "ZIMPLE", telefono: "0986000006", ci: "6060606" },
-                { id: "TIGO-0987000007-7070707", tipo_billetera: "TIGO", telefono: "0987000007", ci: "7070707" },
-                { id: "PERSONAL-0988000008-8080808", tipo_billetera: "PERSONAL", telefono: "0988000008", ci: "8080808" },
-                { id: "ZIMPLE-0989000009-9090909", tipo_billetera: "ZIMPLE", telefono: "0989000009", ci: "9090909" },
-                { id: "TIGO-0981010100-1111111", tipo_billetera: "TIGO", telefono: "0981010100", ci: "1111111" }
-            ];
-
-            for (const wallet of wallets) {
-                await addWallet(wallet);
+// Inicializar IndexedDB
+function initDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = e => {
+            db = e.target.result;
+            if (!db.objectStoreNames.contains("mobile_wallets")) {
+                db.createObjectStore("mobile_wallets", { keyPath: "id" });
             }
+        };
+        request.onsuccess = e => { db = e.target.result; resolve(); };
+        request.onerror = e => reject(e.target.error);
+    });
+}
 
-            console.log("Billeteras de prueba guardadas en IndexedDB local");
+// Agregar billetera a IndexedDB
+function addWallet(wallet) {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("mobile_wallets", "readwrite");
+        const store = tx.objectStore("mobile_wallets");
+        store.put(wallet);
+        tx.oncomplete = () => resolve();
+        tx.onerror = e => reject(e.target.error);
+    });
+}
+
+// Buscar billetera por tipo, teléfono y ci
+function findWallet(tipo, telefono, ci) {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("mobile_wallets", "readonly");
+        const store = tx.objectStore("mobile_wallets");
+        const request = store.get(`${tipo}-${telefono}-${ci}`);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = e => reject(e.target.error);
+    });
+}
+
+// Notificar al proyecto principal
+async function notificarProyectoCompra(estado, monto=null, tipo_pago=null, usuario=null) {
+    try {
+        await fetch('http://localhost:8000/recibir_pago/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ estado, monto, tipo_pago, usuario })
         });
+    } catch (error) {
+        console.error('Error notificando al proyecto compra:', error);
+    }
+}
 
-        function showProcessingMessage() {
-            alert("Procesando pago...");
+// Cargar billeteras de prueba
+window.addEventListener("load", async () => {
+    await initDB();
+    const wallets = [
+        { id: "TIGO-0981000001-1010101", tipo_billetera: "TIGO", telefono: "0981000001", ci: "1010101" },
+        { id: "PERSONAL-0982000002-2020202", tipo_billetera: "PERSONAL", telefono: "0982000002", ci: "2020202" },
+        { id: "ZIMPLE-0983000003-3030303", tipo_billetera: "ZIMPLE", telefono: "0983000003", ci: "3030303" },
+        { id: "TIGO-0984000004-4040404", tipo_billetera: "TIGO", telefono: "0984000004", ci: "4040404" },
+        { id: "PERSONAL-0985000005-5050505", tipo_billetera: "PERSONAL", telefono: "0985000005", ci: "5050505" },
+        { id: "ZIMPLE-0986000006-6060606", tipo_billetera: "ZIMPLE", telefono: "0986000006", ci: "6060606" },
+        { id: "TIGO-0987000007-7070707", tipo_billetera: "TIGO", telefono: "0987000007", ci: "7070707" },
+        { id: "PERSONAL-0988000008-8080808", tipo_billetera: "PERSONAL", telefono: "0988000008", ci: "8080808" },
+        { id: "ZIMPLE-0989000009-9090909", tipo_billetera: "ZIMPLE", telefono: "0989000009", ci: "9090909" },
+        { id: "TIGO-0981010100-1111111", tipo_billetera: "TIGO", telefono: "0981010100", ci: "1111111" }
+    ];
+    for (const w of wallets) await addWallet(w);
+});
+
+// Procesar formulario
+document.getElementById("billeteraForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    alert("Procesando pago...");
+
+    const formData = {
+        monto: document.getElementById("monto").value.trim(),
+        tipo_billetera: document.getElementById("tipo_billetera").value,
+        telefono: document.getElementById("telefono").value.trim(),
+        ci: document.getElementById("ci_number").value.trim()
+    };
+
+    try {
+        const wallet = await findWallet(formData.tipo_billetera, formData.telefono, formData.ci);
+
+        if (!wallet) {
+            alert("Error: No existe una billetera con esos datos");
+            document.getElementById("billeteraForm").reset();
+            await notificarProyectoCompra('error', formData.monto, formData.tipo_billetera, formData.ci);
+            return;
         }
 
-        document.getElementById("billeteraForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            showProcessingMessage();
+        alert(`Pago exitoso: Gs. ${formData.monto} transferido a ${formData.tipo_billetera}`);
+        document.getElementById("billeteraForm").reset();
+        await notificarProyectoCompra('exito', formData.monto, formData.tipo_billetera, formData.ci);
 
-            const formData = {
-                monto: document.getElementById("monto").value.trim(),
-                tipo_billetera: document.getElementById("tipo_billetera").value,
-                telefono: document.getElementById("telefono").value.trim(),
-                ci: document.getElementById("ci_number").value.trim()
-            };
+        window.location.href = "/pagos/";
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Error en la transacción. Por favor, intente nuevamente.");
+        document.getElementById("billeteraForm").reset();
+        await notificarProyectoCompra('error', formData.monto, formData.tipo_billetera, formData.ci);
+    }
+});
 
-            try {
-                const wallet = await findWallet(formData.tipo_billetera, formData.telefono, formData.ci);
-
-                if (!wallet) {
-                    alert("Error: No existe una billetera con esos datos");
-                    document.getElementById("billeteraForm").reset(); // Limpiar formulario
-                    return;
-                }
-
-                alert(`Pago exitoso: Gs. ${formData.monto} transferido a ${formData.tipo_billetera}`);
-                document.getElementById("billeteraForm").reset();
-                window.location.href = "/pagos/";
-            } catch (error) {
-                console.error("Error:", error);
-                alert("Error en la transacción. Por favor, intente nuevamente.");
-                document.getElementById("billeteraForm").reset(); // Limpiar formulario
-            }
-        });
-    </script>
+// Detectar abandono de la página
+window.addEventListener("beforeunload", async e => {
+    await notificarProyectoCompra('cancelado');
+});
+</script>
 </body>
 </html>
