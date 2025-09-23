@@ -1,0 +1,17 @@
+# Archivos de cache de Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Directorios de entornos virtuales
+# Puedes usar 'venv/' si ese es el nombre de tu entorno
+# o simplemente dejar el nombre genérico '__pycache__/'
+venv/
+.venv/
+
+# Base de datos local
+db.sqlite3
+
+# Archivos de configuración y logs
+*.log
+local_settings.py
