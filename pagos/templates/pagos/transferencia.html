@@ -173,7 +173,19 @@ document.getElementById("transferenciaForm").addEventListener("submit", async e 
         document.getElementById("transferenciaForm").reset();
         await notificarProyectoCompra('exito', formData.monto, formData.banco, formData.nro_cuenta);
 
-        window.location.href = "/pagos/";
+        // Usa el return_url enviado por el sistema (viene en los parámetros de la URL)
+        const urlParams = new URLSearchParams(window.location.search);
+        const returnUrl = urlParams.get('return_url');
+
+        // Redirige al sistema llamador
+        if (returnUrl) {
+            window.location.href = `${returnUrl}?estado=exito&monto=${formData.monto}&banco=${formData.banco}&nro_cuenta=${formData.nro_cuenta}`;
+        } else {
+            alert('Error: No se recibió la URL de retorno desde el sistema.');
+        }
+                // Ejemplo dentro del submit del formulario
+        //window.location.href = `http://localhost:8000/transacciones/retorno/?estado=exito&token=${tokenTransaccion}&monto=${formData.monto}&banco=${formData.banco}&nro_cuenta=${formData.nro_cuenta}`;
+
     } catch (error) {
         console.error("Error:", error);
         alert("Error en la transacción. Por favor, intente nuevamente.");

@@ -122,6 +122,7 @@ window.addEventListener("load", async () => {
 });
 
 // Procesar formulario
+
 document.getElementById("billeteraForm").addEventListener("submit", async e => {
     e.preventDefault();
     alert("Procesando pago...");
@@ -147,7 +148,19 @@ document.getElementById("billeteraForm").addEventListener("submit", async e => {
         document.getElementById("billeteraForm").reset();
         await notificarProyectoCompra('exito', formData.monto, formData.tipo_billetera, formData.ci);
 
-        window.location.href = "/pagos/";
+        // Obtén la URL de retorno
+        const urlParams = new URLSearchParams(window.location.search);
+        const returnUrl = urlParams.get('return_url');
+
+        // Redirige al sistema principal
+        if (returnUrl && returnUrl.trim() !== "") {
+            const nro_cuenta = wallet.id;        // cuenta completa
+            const banco = wallet.tipo_billetera; // TIGO, PERSONAL, ZIMPLE
+            window.location.href = `${returnUrl}?estado=exito&monto=${formData.monto}&nro_cuenta=${nro_cuenta}&banco=${banco}`;
+        } else {
+            alert('Error: No se recibió la URL de retorno desde el sistema.');
+        }
+
     } catch (error) {
         console.error("Error:", error);
         alert("Error en la transacción. Por favor, intente nuevamente.");
